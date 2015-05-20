@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GPS notifications</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="action_marker_list">Marker List</string>
+</resources>
