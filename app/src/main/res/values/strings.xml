@@ -2,4 +2,34 @@
     <string name="app_name">GPS notifications</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_marker_list">Marker List</string>
+
+    <string name="title_marker_current_position">Current position</string>
+
+    <string name="title_dialog_alarm">Set Alarm options:</string>
+    <string name="label_dialog_cancel_button">Cancel</string>
+    <string name="label_dialog_add_button">Add</string>
+    <string name="hint_dialog_name">Name of alarm (optional)</string>
+    <string name="hint_dialog_address">Address of alarm</string>
+    <string name="label_dialog_choose_alarm_type">Choose alarm type:</string>
+    <string name="label_dialog_choose_distance">Choose distance in %1$s:</string>
+    <string name="checkbox_dialog_vibration">Vibration</string>
+    <string name="checkbox_dialog_sound">Sound</string>
+    <string name="checkbox_dialog_led">Led</string>
+
+    <string name="label_feet">Feet</string>
+    <string name="label_meters">Meters</string>
+
+    <string-array name="array_distance_meters">
+        <item>10</item>
+        <item>50</item>
+        <item>100</item>
+        <item>500</item>
+    </string-array>
+
+    <string-array name="array_distance_feet">
+        <item>32.81</item>
+        <item>164.04</item>
+        <item>328.08</item>
+        <item>1640.42</item>
+    </string-array>
 </resources>
