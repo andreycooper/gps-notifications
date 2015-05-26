@@ -9,39 +9,39 @@
         android:id="@+id/name_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/hint_dialog_name"
+        android:hint="@string/hint_add_alarm_dialog_name"
         android:singleLine="true"/>
 
     <EditText
         android:id="@+id/address_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/hint_dialog_address"
+        android:hint="@string/hint_add_alarm_dialog_address"
         android:singleLine="true"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dialog_text_padding"
-        android:text="@string/label_dialog_choose_alarm_type"/>
+        android:text="@string/label_add_alarm_dialog_choose_alarm_type"/>
 
     <CheckBox
         android:id="@+id/vibration_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/checkbox_dialog_vibration"/>
+        android:text="@string/checkbox_add_alarm_dialog_vibration"/>
 
     <CheckBox
         android:id="@+id/sound_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/checkbox_dialog_sound"/>
+        android:text="@string/checkbox_add_alarm_dialog_sound"/>
 
     <CheckBox
         android:id="@+id/led_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/checkbox_dialog_led"/>
+        android:text="@string/checkbox_add_alarm_dialog_led"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:padding="@dimen/dialog_text_padding"
-            android:text="@string/label_dialog_choose_distance"/>
+            android:text="@string/label_add_market_dialog_choose_distance"/>
 
         <Spinner
             android:id="@+id/distance_spinner"

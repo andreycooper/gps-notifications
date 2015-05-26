@@ -5,16 +5,21 @@
 
     <string name="title_marker_current_position">Current position</string>
 
-    <string name="title_dialog_alarm">Set Alarm options:</string>
-    <string name="label_dialog_cancel_button">Cancel</string>
-    <string name="label_dialog_add_button">Add</string>
-    <string name="hint_dialog_name">Name of alarm (optional)</string>
-    <string name="hint_dialog_address">Address of alarm</string>
-    <string name="label_dialog_choose_alarm_type">Choose alarm type:</string>
-    <string name="label_dialog_choose_distance">Choose distance in %1$s:</string>
-    <string name="checkbox_dialog_vibration">Vibration</string>
-    <string name="checkbox_dialog_sound">Sound</string>
-    <string name="checkbox_dialog_led">Led</string>
+    <string name="title_add_alarm_dialog">Set Alarm options:</string>
+    <string name="label_add_alarm_dialog_cancel_button">Cancel</string>
+    <string name="label_add_alarm_dialog_add_button">Add</string>
+    <string name="hint_add_alarm_dialog_name">Name of alarm (optional)</string>
+    <string name="hint_add_alarm_dialog_address">Address of alarm</string>
+    <string name="label_add_alarm_dialog_choose_alarm_type">Choose alarm type:</string>
+    <string name="label_add_market_dialog_choose_distance">Choose distance in %1$s:</string>
+    <string name="checkbox_add_alarm_dialog_vibration">Vibration</string>
+    <string name="checkbox_add_alarm_dialog_sound">Sound</string>
+    <string name="checkbox_add_alarm_dialog_led">Led</string>
+
+    <string name="title_delete_alarm_dialog">Delete Alarm?</string>
+    <string name="label_delete_alarm_dialog">Are you sure want to delete Alarm at %1$s?</string>
+    <string name="label_delete_alarm_dialog_cancel_button">Cancel</string>
+    <string name="label_delete_alarm_dialog_delete_button">Delete</string>
 
     <string name="label_feet">Feet</string>
     <string name="label_meters">Meters</string>
@@ -32,4 +37,40 @@
         <item>328.08</item>
         <item>1640.42</item>
     </string-array>
+
+    <string name="title_activity_alarm_list">Alarms</string>
+    <string name="label_card_name">Name of alarm: %1$s</string>
+    <string name="label_card_address">Address: %1$s</string>
+    <string name="label_card_indication">Indication:</string>
+    <string name="label_card_vibration">Vibration</string>
+    <string name="label_card_sound">Sound</string>
+    <string name="label_card_led">Led</string>
+    <string name="label_card_distance">Distance: %1$s</string>
+
+    <string name="name_alarm_empty">Empty name</string>
+
+    <!-- Error strings -->
+    <string name="not_connected">GoogleApiClient no yet connected. Try again.</string>
+    <string name="geofence_not_available">Geofence service is not available now</string>
+    <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
+    <string name="geofence_too_many_pending_intents">
+        You have provided too many PendingIntents to the addGeofences() call
+    </string>
+    <string name="unknown_geofence_error">
+        Unknown error: the Geofence service is not available now
+    </string>
+    <string name="geofence_transition_invalid_type">
+        Geofence transition error: invalid transition type %1$d
+    </string>
+
+    <string name="geofences_added">Geofences added</string>
+    <string name="geofences_removed">Geofences removed</string>
+
+    <!-- Transition type strings -->
+    <string name="geofence_transition_entered">Entered</string>
+    <string name="geofence_transition_exited">Exited</string>
+    <string name="unknown_geofence_transition">Unknown Transition</string>
+
+    <string name="geofence_transition_notification_text">Click notification to return to app</string>
+
 </resources>

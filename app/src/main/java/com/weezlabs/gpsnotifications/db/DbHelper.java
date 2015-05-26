@@ -16,8 +16,8 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String CREATE_ALARM_TABLE = "" +
             "CREATE TABLE " + Alarm.TABLE + "(" +
             Alarm.ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            Alarm.LAT + " FLOAT NOT NULL," +
-            Alarm.LNG + " FLOAT NOT NULL," +
+            Alarm.LAT + " DOUBLE NOT NULL," +
+            Alarm.LNG + " DOUBLE NOT NULL," +
             Alarm.NAME + " TEXT," +
             Alarm.ADDRESS + " TEXT NOT NULL," +
             Alarm.VIBRATION + " INTEGER NOT NULL," +

@@ -15,21 +15,19 @@ public class AlarmContentProvider extends ContentProvider {
     public static final String AUTHORITY = "com.weezlabs.gpsnotifications.provider";
 
     private static final String SCHEME = "content://";
-    private static final String UNKNOWN_URI = "Unknown URI";
-
-    private static final String ALARMS_PATH = "alarms";
-
-    private static final int ALARMS = 10;
-    private static final int ALARM_ID = 11;
-
     public static final Uri BASE_CONTENT_URI = Uri.parse(SCHEME + AUTHORITY);
-
+    private static final String UNKNOWN_URI = "Unknown URI";
+    private static final String ALARMS_PATH = "alarms";
     public static final Uri ALARMS_CONTENT_URI = BASE_CONTENT_URI.buildUpon()
             .appendPath(ALARMS_PATH).build();
-
+    private static final int ALARMS = 10;
+    private static final int ALARM_ID = 11;
     private final static UriMatcher sUriMatcher = buildUriMatcher();
 
     private DbHelper mDbHelper;
+
+    public AlarmContentProvider() {
+    }
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -43,9 +41,6 @@ public class AlarmContentProvider extends ContentProvider {
 
     public static Uri buildAlarmIdUri(int alarmId) {
         return ALARMS_CONTENT_URI.buildUpon().appendPath(String.valueOf(alarmId)).build();
-    }
-
-    public AlarmContentProvider() {
     }
 
     @Override
@@ -109,6 +104,10 @@ public class AlarmContentProvider extends ContentProvider {
         switch (match) {
             case ALARM_ID:
                 selection = getAlarmSelection(uri, selection);
+                countRows = mDbHelper.getWritableDatabase().delete(Alarm.TABLE, selection, selectionArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                break;
+            case ALARMS:
                 countRows = mDbHelper.getWritableDatabase().delete(Alarm.TABLE, selection, selectionArgs);
                 getContext().getContentResolver().notifyChange(uri, null);
                 break;

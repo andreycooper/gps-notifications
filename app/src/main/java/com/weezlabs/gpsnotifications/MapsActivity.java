@@ -1,8 +1,13 @@
 package com.weezlabs.gpsnotifications;
 
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -24,45 +29,98 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.weezlabs.gpsnotifications.db.AlarmContentProvider;
 import com.weezlabs.gpsnotifications.model.Alarm;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends AppCompatActivity implements LocationProvider.LocationCallback,
-        LoaderManager.LoaderCallbacks<String> {
+public class MapsActivity extends AppCompatActivity implements LocationProvider.LocationCallback {
     private static final String LOG_TAG = MapsActivity.class.getSimpleName();
+    private static final int ALARMS_LOADER = 335;
     private static final int ADDRESS_LOADER = 113;
-    // temp const
-    static final LatLng MELBOURNE = new LatLng(-37.813, 144.962);
+    private static final float ZOOM_LEVEL = 12;
+    final private HashMap<Marker, Alarm> mMarkerHashMap = new HashMap<>();
+    final private HashMap<Marker, Circle> mCircleHashMap = new HashMap<>();
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private LatLng mLatLng;
-    final private int[] mDistances = {10, 50, 100, 500};
+    private int[] mDistances;
+    private LoaderManager.LoaderCallbacks<String> mLoadAddressCallback;
+    private LoaderManager.LoaderCallbacks<Cursor> mLoadAlarmsCallback;
 
     private LocationProvider mLocationProvider;
     private Marker mCurrentPosMarker;
+    private CameraPosition mCameraPosition;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        initCallbacks();
+
+        mDistances = getResources().getIntArray(R.array.array_alarm_distances);
+
         setUpMapIfNeeded();
 
         mLocationProvider = new LocationProvider(this, this);
+
+        initProgress();
+
+        if (mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
+
+    }
+
+    private void initProgress() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setMessage("Getting address...");
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCanceledOnTouchOutside(false);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mLocationProvider.connect();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-        mLocationProvider.connect();
+        if (mMap != null) {
+            CameraPosition cameraPosition = Utils.restoreCameraPosition(getApplicationContext());
+            if (cameraPosition != null) {
+                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                mCameraPosition = cameraPosition;
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        if (mMap != null) {
+            Utils.saveCameraPosition(getApplicationContext(), mMap.getCameraPosition());
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         mLocationProvider.disconnect();
     }
 
@@ -82,7 +140,7 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
     private void setUpMap() {
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
-            public void onMapClick(LatLng latLng) {
+            public void onMapClick(final LatLng latLng) {
                 mLatLng = latLng;
                 loadAddress(mLatLng);
             }
@@ -90,7 +148,9 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                if (mCurrentPosMarker != null && mCurrentPosMarker.equals(marker)) {
+                if (mMarkerHashMap.containsKey(marker)) {
+                    showDeleteMarkerDialog(marker);
+                } else if (mCurrentPosMarker != null && mCurrentPosMarker.equals(marker)) {
                     mLatLng = marker.getPosition();
                     loadAddress(mLatLng);
                 }
@@ -98,17 +158,56 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
             }
         });
 
-        Marker melbourne = mMap.addMarker(new MarkerOptions()
-                .position(MELBOURNE)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        loadAlarms();
+    }
 
+    private void showDeleteMarkerDialog(final Marker marker) {
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(MapsActivity.this,
+                        R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
+        builder.setTitle(R.string.title_delete_alarm_dialog);
+        builder.setMessage(getString(R.string.label_delete_alarm_dialog,
+                mMarkerHashMap.get(marker).getAddress()));
+        builder.setCancelable(false);
+        builder.setNegativeButton(R.string.label_delete_alarm_dialog_cancel_button,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        builder.setPositiveButton(R.string.label_delete_alarm_dialog_delete_button,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteAlarmAndMarker(marker);
+                        dialog.dismiss();
+                    }
+                });
+
+        builder.create().show();
+    }
+
+    private void deleteAlarmAndMarker(Marker marker) {
+        Alarm alarm = mMarkerHashMap.remove(marker);
+        Circle circle = mCircleHashMap.remove(marker);
+        if (alarm.getId() > 0) {
+            getContentResolver().delete(AlarmContentProvider.buildAlarmIdUri(alarm.getId()), null, null);
+        } else {
+            getContentResolver().delete(AlarmContentProvider.ALARMS_CONTENT_URI,
+                    Alarm.LAT + "=? AND " + Alarm.LNG + "=?",
+                    new String[]{String.valueOf(alarm.getLat()), String.valueOf(alarm.getLng())});
+        }
+        marker.remove();
+        circle.remove();
+        mLocationProvider.removeGeofenceAlarm(alarm);
     }
 
     private void showAddMarkerDialog(final LatLng latLng, final String address) {
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(MapsActivity.this,
                         R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
-        builder.setTitle(R.string.title_dialog_alarm);
+        builder.setTitle(R.string.title_add_alarm_dialog);
         builder.setCancelable(false);
 
         View inflatedView = LayoutInflater.from(MapsActivity.this)
@@ -128,13 +227,13 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         final ArrayAdapter<String> spinnerAdapter;
 
         if (Locale.getDefault().getDisplayLanguage().equals(Locale.ENGLISH.getDisplayLanguage())) {
-            distanceLabel.setText(getString(R.string.label_dialog_choose_distance,
+            distanceLabel.setText(getString(R.string.label_add_market_dialog_choose_distance,
                     getString(R.string.label_feet)));
             spinnerAdapter = new ArrayAdapter<>(MapsActivity.this,
                     android.R.layout.simple_spinner_dropdown_item,
                     getResources().getStringArray(R.array.array_distance_feet));
         } else {
-            distanceLabel.setText(getString(R.string.label_dialog_choose_distance,
+            distanceLabel.setText(getString(R.string.label_add_market_dialog_choose_distance,
                     getString(R.string.label_meters)));
             spinnerAdapter = new ArrayAdapter<>(MapsActivity.this,
                     android.R.layout.simple_spinner_dropdown_item,
@@ -143,40 +242,71 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         distanceSpinner.setAdapter(spinnerAdapter);
 
         builder.setView(inflatedView);
-        builder.setNegativeButton(R.string.label_dialog_cancel_button, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.label_add_alarm_dialog_cancel_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        builder.setPositiveButton(R.string.label_dialog_add_button, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.label_add_alarm_dialog_add_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MapsActivity.this, "LatLng: " + latLng.toString() + "\n"
-                        + "Address: " + address, Toast.LENGTH_SHORT).show();
-                // TODO: check fields, create alarm, save it to db and place marker with circle
                 Alarm alarm = new Alarm(latLng.latitude,
                         latLng.longitude,
-                        address,
+                        address.trim(),
                         vibrationCheck.isChecked(),
                         soundCheck.isChecked(),
                         ledCheck.isChecked(),
                         mDistances[distanceSpinner.getSelectedItemPosition()]);
                 if (!TextUtils.isEmpty(nameEdit.getText().toString())) {
-                    alarm.setName(nameEdit.getText().toString());
+                    alarm.setName(nameEdit.getText().toString().trim());
                 }
 
-                placeAlarmMarkerOnMap(alarm);
+                getContentResolver().insert(AlarmContentProvider.ALARMS_CONTENT_URI, new Alarm.Builder()
+                        .lat(alarm.getLat())
+                        .lng(alarm.getLng())
+                        .name(alarm.getName())
+                        .address(alarm.getAddress())
+                        .vibrate(alarm.isVibration())
+                        .sound(alarm.isSound())
+                        .led(alarm.isLed())
+                        .distance(alarm.getDistance())
+                        .build());
+
+                mLocationProvider.addGeofenceAlarm(alarm);
+
                 dialog.dismiss();
             }
         });
 
+        mProgressDialog.dismiss();
         builder.create().show();
     }
 
-    private void placeAlarmMarkerOnMap(Alarm alarm) {
-        // TODO: place alarm
+    private void fillMapMarkers(List<Alarm> alarmList) {
+        for (Alarm alarm : alarmList) {
+            placeAlarmMarkerOnMap(alarm);
+        }
+    }
 
+    private void placeAlarmMarkerOnMap(Alarm alarm) {
+        if (!mMarkerHashMap.containsValue(alarm)) {
+            LatLng latLng = new LatLng(alarm.getLat(), alarm.getLng());
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(alarm.getName())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+            Circle circle = mMap.addCircle(new CircleOptions()
+                    .center(latLng)
+                    .strokeWidth(getResources().getDimension(R.dimen.circle_stroke_width))
+                    .fillColor(getResources().getColor(R.color.circle_color))
+                    .strokeColor(Color.BLUE)
+                    .radius(alarm.getDistance())); // In meters
+
+            mMarkerHashMap.put(marker, alarm);
+            mCircleHashMap.put(marker, circle);
+        }
     }
 
     private void loadAddress(LatLng latLng) {
@@ -185,9 +315,20 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         args.putParcelable(AddressAsyncLoader.LAT_LNG_KEY, latLng);
         Loader<String> loader = getLoaderManager().getLoader(ADDRESS_LOADER);
         if (loader == null) {
-            loader = getLoaderManager().initLoader(ADDRESS_LOADER, args, this);
+            loader = getLoaderManager().initLoader(ADDRESS_LOADER, args, mLoadAddressCallback);
         } else {
-            loader = getLoaderManager().restartLoader(ADDRESS_LOADER, args, this);
+            loader = getLoaderManager().restartLoader(ADDRESS_LOADER, args, mLoadAddressCallback);
+        }
+        loader.forceLoad();
+        mProgressDialog.show();
+    }
+
+    private void loadAlarms() {
+        Loader<Cursor> loader = getLoaderManager().getLoader(ALARMS_LOADER);
+        if (loader == null) {
+            loader = getLoaderManager().initLoader(ALARMS_LOADER, null, mLoadAlarmsCallback);
+        } else {
+            loader = getLoaderManager().restartLoader(ALARMS_LOADER, null, mLoadAlarmsCallback);
         }
         loader.forceLoad();
     }
@@ -203,11 +344,84 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         int id = item.getItemId();
 
         if (id == R.id.action_marker_list) {
-            Toast.makeText(this, "TODO: implement marker's list", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, AlarmListActivity.class));
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void initCallbacks() {
+        mLoadAddressCallback = new LoaderManager.LoaderCallbacks<String>() {
+            @Override
+            public Loader<String> onCreateLoader(int id, Bundle args) {
+                switch (id) {
+                    case ADDRESS_LOADER:
+                        return new AddressAsyncLoader(getApplicationContext(), args);
+                    default:
+                        return null;
+                }
+            }
+
+            @Override
+            public void onLoadFinished(Loader<String> loader, String data) {
+                switch (loader.getId()) {
+                    case ADDRESS_LOADER:
+                        if (!TextUtils.isEmpty(data)) {
+                            showAddMarkerDialog(mLatLng, data);
+                        } else {
+                            mProgressDialog.dismiss();
+                            Toast.makeText(MapsActivity.this, "Can't load address at "
+                                    + mLatLng.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onLoaderReset(Loader<String> loader) {
+                mProgressDialog.dismiss();
+            }
+        };
+
+        mLoadAlarmsCallback = new LoaderManager.LoaderCallbacks<Cursor>() {
+            @Override
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                switch (id) {
+                    case ALARMS_LOADER:
+                        return new CursorLoader(getApplicationContext(),
+                                AlarmContentProvider.ALARMS_CONTENT_URI,
+                                Alarm.ALL_COLUMNS, null, null, null);
+                    default:
+                        return null;
+                }
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                switch (loader.getId()) {
+                    case ALARMS_LOADER:
+                        List<Alarm> alarmList = new ArrayList<>();
+                        if (data != null && data.moveToFirst()) {
+                            do {
+                                alarmList.add(new Alarm(data));
+                            } while (data.moveToNext());
+                        }
+                        fillMapMarkers(alarmList);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Cursor> loader) {
+
+            }
+        };
+
     }
 
     @Override
@@ -221,35 +435,20 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .title(getString(R.string.title_marker_current_position));
+        // remove old marker
+        if (mCurrentPosMarker != null) {
+            mCurrentPosMarker.remove();
+        }
+
         mCurrentPosMarker = mMap.addMarker(options);
         mCurrentPosMarker.showInfoWindow();
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-    }
-
-    @Override
-    public Loader<String> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case ADDRESS_LOADER:
-                return new AddressAsyncLoader(getApplicationContext(), args);
-            default:
-                return null;
+        if (mCameraPosition == null) {
+            mCameraPosition = new CameraPosition.Builder()
+                    .target(latLng)
+                    .zoom(ZOOM_LEVEL)
+                    .build();
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
         }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
-        switch (loader.getId()) {
-            case ADDRESS_LOADER:
-                showAddMarkerDialog(mLatLng, data);
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<String> loader) {
-
     }
 
 }
