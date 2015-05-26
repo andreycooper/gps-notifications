@@ -80,7 +80,7 @@ public class LocationProvider implements
 
     public void addGeofenceAlarm(Alarm alarm) {
         if (!mGoogleApiClient.isConnected()) {
-            Toast.makeText(mContext, mContext.getString(R.string.not_connected), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.client_not_connected), Toast.LENGTH_SHORT).show();
             return;
         }
         try {
@@ -101,7 +101,7 @@ public class LocationProvider implements
 
     public void removeGeofenceAlarm(Alarm alarm) {
         if (!mGoogleApiClient.isConnected()) {
-            Toast.makeText(mContext, mContext.getString(R.string.not_connected), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.client_not_connected), Toast.LENGTH_SHORT).show();
             return;
         }
         List<String> geofencesRequestIdList = new ArrayList<>();

@@ -43,7 +43,7 @@ public class GeofenceErrorMessages {
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
                 return mResources.getString(R.string.geofence_too_many_pending_intents);
             default:
-                return mResources.getString(R.string.unknown_geofence_error);
+                return mResources.getString(R.string.geofence_unknown_error);
         }
     }
 }

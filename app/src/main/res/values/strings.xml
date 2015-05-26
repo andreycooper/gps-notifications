@@ -50,13 +50,13 @@
     <string name="name_alarm_empty">Empty name</string>
 
     <!-- Error strings -->
-    <string name="not_connected">GoogleApiClient no yet connected. Try again.</string>
+    <string name="client_not_connected">GoogleApiClient no yet connected. Try again.</string>
     <string name="geofence_not_available">Geofence service is not available now</string>
     <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
     <string name="geofence_too_many_pending_intents">
         You have provided too many PendingIntents to the addGeofences() call
     </string>
-    <string name="unknown_geofence_error">
+    <string name="geofence_unknown_error">
         Unknown error: the Geofence service is not available now
     </string>
     <string name="geofence_transition_invalid_type">
@@ -69,8 +69,13 @@
     <!-- Transition type strings -->
     <string name="geofence_transition_entered">Entered</string>
     <string name="geofence_transition_exited">Exited</string>
-    <string name="unknown_geofence_transition">Unknown Transition</string>
+    <string name="geofence_unknown_transition">Unknown Transition</string>
 
     <string name="geofence_transition_notification_text">Click notification to return to app</string>
+
+    <string name="geofence_notification_title">Entered to geofence</string>
+    <string name="geofence_notification_text">You are entered to geofence at %1$s</string>
+    <string name="geofence_notification_cancel">Close</string>
+    <string name="geofence_notification_repeat">Repeat</string>
 
 </resources>
