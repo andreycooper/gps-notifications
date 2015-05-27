@@ -1,4 +1,4 @@
-package com.weezlabs.gpsnotifications;
+package com.weezlabs.gpsnotifications.service;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -20,6 +20,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.weezlabs.gpsnotifications.R;
 import com.weezlabs.gpsnotifications.model.Alarm;
 
 import java.util.ArrayList;
@@ -32,8 +33,7 @@ public class LocationProvider implements
         LocationListener, ResultCallback<Status> {
 
 
-    public static final String TAG = LocationProvider.class.getSimpleName();
-    public static final String GEOFENCES_ADDED_KEY = "geofences_add_key";
+    public static final String LOG_TAG = LocationProvider.class.getSimpleName();
     /*
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
@@ -60,7 +60,7 @@ public class LocationProvider implements
         // Create the LocationRequest object
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(5 * SEC)        // 10 seconds, in milliseconds
+                .setInterval(5 * SEC)        // 5 seconds, in milliseconds
                 .setFastestInterval(1 * SEC); // 1 second, in milliseconds
 
 
@@ -120,7 +120,7 @@ public class LocationProvider implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.i(TAG, "Location services connected.");
+        Log.i(LOG_TAG, "Location services connected.");
 
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
@@ -133,7 +133,7 @@ public class LocationProvider implements
     @Override
     public void onConnectionSuspended(int i) {
         // The connection to Google Play services was lost for some reason.
-        Log.i(TAG, "Connection suspended");
+        Log.i(LOG_TAG, "Connection suspended");
 
         // onConnected() will be called again automatically when the service reconnects
     }
@@ -164,13 +164,13 @@ public class LocationProvider implements
              * If no resolution is available, display a dialog to the
              * user with the error.
              */
-            Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+            Log.i(LOG_TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i(TAG, "Location changed.");
+        Log.i(LOG_TAG, "Location received");
         mLocationCallback.handleNewLocation(location);
     }
 
@@ -187,7 +187,7 @@ public class LocationProvider implements
             // Get the status code for the error and log it using a user-friendly message.
             String errorMessage = GeofenceErrorMessages.getErrorString(mContext,
                     status.getStatusCode());
-            Log.e(TAG, errorMessage);
+            Log.e(LOG_TAG, errorMessage);
         }
     }
 
@@ -220,19 +220,15 @@ public class LocationProvider implements
      * @return A PendingIntent for the IntentService that handles geofence transitions.
      */
     private PendingIntent getGeofencePendingIntent() {
-//        // Reuse the PendingIntent if we already have it.
-//        if (mGeofencePendingIntent != null) {
-//            return mGeofencePendingIntent;
-//        }
         Intent intent = new Intent(mContext, GeofenceIntentService.class);
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
         // addGeofences() and removeGeofences().
-        return PendingIntent.getService(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(mContext, 12, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
 
     private void logSecurityException(SecurityException securityException) {
-        Log.e(TAG, "Invalid location permission. " +
+        Log.e(LOG_TAG, "Invalid location permission. " +
                 "You need to use ACCESS_FINE_LOCATION with geofences", securityException);
     }
 

@@ -26,7 +26,7 @@ public class Alarm implements Parcelable {
      * Used to set an expiration time for a geofence. After this amount of time Location Services
      * stops tracking the geofence.
      */
-    public static final long GEOFENCE_EXPIRATION_IN_HOURS = 12;
+    public static final long GEOFENCE_EXPIRATION_IN_HOURS = 24;
 
     /**
      * For this sample, geofences expire after twelve hours.
@@ -183,12 +183,9 @@ public class Alarm implements Parcelable {
                 // geofence.
                 .setRequestId(getGeofenceId())
                         // Set the circular region of this geofence.
-                .setCircularRegion(
-                        getLat(),
-                        getLng(),
-                        getDistance()
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setCircularRegion(getLat(), getLng(), getDistance())
+                .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+//                .setExpirationDuration(Geofence.NEVER_EXPIRE)
                         // Set the transition types of interest. Alerts are only generated for these
                         // transition. We track entry and exit transitions in this sample.
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)

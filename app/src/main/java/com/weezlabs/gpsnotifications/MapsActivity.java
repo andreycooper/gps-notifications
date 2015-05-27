@@ -37,6 +37,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.weezlabs.gpsnotifications.db.AlarmContentProvider;
 import com.weezlabs.gpsnotifications.model.Alarm;
+import com.weezlabs.gpsnotifications.service.AddressAsyncLoader;
+import com.weezlabs.gpsnotifications.service.LocationProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -301,7 +303,7 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
                     .center(latLng)
                     .strokeWidth(getResources().getDimension(R.dimen.circle_stroke_width))
                     .fillColor(getResources().getColor(R.color.circle_color))
-                    .strokeColor(Color.BLUE)
+                    .strokeColor(Color.TRANSPARENT)
                     .radius(alarm.getDistance())); // In meters
 
             mMarkerHashMap.put(marker, alarm);
@@ -310,7 +312,6 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
     }
 
     private void loadAddress(LatLng latLng) {
-        // TODO: maybe show progress
         Bundle args = new Bundle();
         args.putParcelable(AddressAsyncLoader.LAT_LNG_KEY, latLng);
         Loader<String> loader = getLoaderManager().getLoader(ADDRESS_LOADER);

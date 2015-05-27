@@ -1,4 +1,4 @@
-package com.weezlabs.gpsnotifications;
+package com.weezlabs.gpsnotifications.service;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
