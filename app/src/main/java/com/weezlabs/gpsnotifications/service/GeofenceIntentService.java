@@ -67,7 +67,6 @@ public class GeofenceIntentService extends IntentService {
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
-            // TODO: get Alarms for geofences using ContentProvider
             List<Alarm> triggeringAlarms = getTriggeringAlarmList(triggeringGeofences);
             for (Alarm alarm : triggeringAlarms) {
                 Log.d(LOG_TAG, alarm.toString());

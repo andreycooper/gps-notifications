@@ -21,7 +21,6 @@ public class CancelIntentService extends IntentService {
         if (intent != null) {
             int notificationId = intent.getIntExtra(GeofenceIntentService.NOTIFICATION_ID,
                     GeofenceIntentService.INCORRECT_VALUE);
-            Log.d(LOG_TAG, "notification id: " + notificationId);
             NotificationManager manager = (NotificationManager)
                     getSystemService(Context.NOTIFICATION_SERVICE);
             manager.cancel(notificationId);

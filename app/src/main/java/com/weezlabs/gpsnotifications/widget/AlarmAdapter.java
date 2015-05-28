@@ -13,16 +13,27 @@ import android.widget.TextView;
 import com.weezlabs.gpsnotifications.R;
 import com.weezlabs.gpsnotifications.model.Alarm;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
+
 /**
  * Created by Andrey Bondarenko on 25.05.15.
  */
 public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder> {
 
+    public static final double FEET_RATE = 3.2808;
+    public static final String FEET_PATTERN = "0.00";
+
     private Context mContext;
+    private OnItemClickListener mOnItemClickListener;
+    private boolean mIsEnLocale;
 
     public AlarmAdapter(Context context, Cursor cursor) {
         super(cursor);
         mContext = context.getApplicationContext();
+        mIsEnLocale = Locale.getDefault().getDisplayLanguage()
+                .equals(Locale.ENGLISH.getDisplayLanguage());
+
     }
 
     @Override
@@ -38,8 +49,15 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
         holder.vibration.setChecked(alarm.isVibration());
         holder.sound.setChecked(alarm.isSound());
         holder.led.setChecked(alarm.isLed());
-        // TODO: set distance in feet or meters
-        holder.distance.setText(mContext.getString(R.string.label_card_distance, alarm.getDistance()));
+        if (mIsEnLocale) {
+            double feet = alarm.getDistance() * FEET_RATE;
+            DecimalFormat format = new DecimalFormat(FEET_PATTERN);
+            holder.distance.setText(mContext.getString(R.string.label_card_distance,
+                    format.format(feet), mContext.getString(R.string.label_feet)));
+        } else {
+            holder.distance.setText(mContext.getString(R.string.label_card_distance,
+                    alarm.getDistance(), mContext.getString(R.string.label_meters)));
+        }
     }
 
     @Override
@@ -49,7 +67,11 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
         return new ViewHolder(itemView);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public void setOnItemClickListener(final OnItemClickListener onItemClickListener) {
+        mOnItemClickListener = onItemClickListener;
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView name;
         TextView address;
         CheckBox vibration;
@@ -57,8 +79,9 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
         CheckBox led;
         TextView distance;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(final View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             name = (TextView) itemView.findViewById(R.id.name_text_view);
             address = (TextView) itemView.findViewById(R.id.address_text_view);
             vibration = (CheckBox) itemView.findViewById(R.id.vibration_checkbox);
@@ -66,5 +89,16 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
             led = (CheckBox) itemView.findViewById(R.id.led_checkbox);
             distance = (TextView) itemView.findViewById(R.id.distance_text_view);
         }
+
+        @Override
+        public void onClick(View v) {
+            if (mOnItemClickListener != null) {
+                mOnItemClickListener.onItemClick(v, getAdapterPosition());
+            }
+        }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
     }
 }

@@ -10,12 +10,6 @@ import android.util.Log;
 import com.weezlabs.gpsnotifications.model.Alarm;
 
 
-/**
- * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * <p/>
- * TODO: Customize class - update intent actions and extra parameters.
- */
 public class SnoozeIntentService extends IntentService {
 
     private static final String LOG_TAG = SnoozeIntentService.class.getSimpleName();
@@ -31,8 +25,6 @@ public class SnoozeIntentService extends IntentService {
             int notificationId = intent.getIntExtra(GeofenceIntentService.NOTIFICATION_ID,
                     GeofenceIntentService.INCORRECT_VALUE);
             Alarm alarm = intent.getParcelableExtra(GeofenceIntentService.ALARM_EXTRA);
-            Log.d(LOG_TAG, "notification id: " + notificationId);
-            Log.d(LOG_TAG, "alarm: " + alarm);
             NotificationManager manager = (NotificationManager)
                     getSystemService(Context.NOTIFICATION_SERVICE);
             manager.cancel(notificationId);

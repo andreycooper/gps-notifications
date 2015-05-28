@@ -28,9 +28,6 @@ public class Alarm implements Parcelable {
      */
     public static final long GEOFENCE_EXPIRATION_IN_HOURS = 24;
 
-    /**
-     * For this sample, geofences expire after twelve hours.
-     */
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
             GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
 

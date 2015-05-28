@@ -40,31 +40,68 @@
 
         <LinearLayout
             android:id="@+id/indication_layout"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/card_indication_margin"
+            android:background="@null"
             android:orientation="vertical">
 
-            <CheckBox
-                android:id="@+id/vibration_checkbox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="@string/label_card_vibration"/>
+                android:orientation="horizontal">
 
-            <CheckBox
-                android:id="@+id/sound_checkbox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="@string/label_card_sound"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="6"
+                    android:text="@string/label_card_vibration"/>
 
-            <CheckBox
-                android:id="@+id/led_checkbox"
+                <CheckBox
+                    android:id="@+id/vibration_checkbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="@string/label_card_led"/>
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="6"
+                    android:text="@string/label_card_sound"/>
+
+                <CheckBox
+                    android:id="@+id/sound_checkbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="6"
+                    android:text="@string/label_card_led"/>
+
+                <CheckBox
+                    android:id="@+id/led_checkbox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"/>
+            </LinearLayout>
 
         </LinearLayout>
 

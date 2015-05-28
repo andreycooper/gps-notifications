@@ -63,7 +63,7 @@ public class AddressAsyncLoader extends AsyncTaskLoader<String> {
             Address address = addresses.get(0);
             if (!TextUtils.isEmpty(address.getLocality())
                     && address.getMaxAddressLineIndex() >= 0) {
-                // TODO: place more addresses, see yours github
+                // TODO: maybe place more info about addresses, see https://github.com/andreycooper/google-geocode-sample
                 addressStr = address.getLocality() + ", " + address.getAddressLine(0);
             } else if (!TextUtils.isEmpty(address.getLocality())) {
                 addressStr = address.getLocality();
