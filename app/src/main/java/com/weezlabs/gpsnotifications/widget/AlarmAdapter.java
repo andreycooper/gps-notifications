@@ -8,8 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.weezlabs.gpsnotifications.R;
 import com.weezlabs.gpsnotifications.model.Alarm;
 
@@ -21,8 +23,16 @@ import java.util.Locale;
  */
 public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder> {
 
-    public static final double FEET_RATE = 3.2808;
-    public static final String FEET_PATTERN = "0.00";
+    private static final double FEET_RATE = 3.2808;
+    private static final String FEET_PATTERN = "0.00";
+
+    private static final String IMAGE_MAP_SIZE = "200x200";
+    private static final int IMAGE_MAP_ZOOM = 16;
+    private static final String IMAGE_MAP_MARKER_COLOR = "blue";
+
+    private static final String BEGIN_URL = "https://maps.googleapis.com/maps/api/staticmap?center=";
+    private static final String PARAMETERS_URL = "&zoom=" + IMAGE_MAP_ZOOM + "&size=" + IMAGE_MAP_SIZE +
+            "&scale=2&format=png" + "&markers=size:mid|color:" + IMAGE_MAP_MARKER_COLOR + "|";
 
     private Context mContext;
     private OnItemClickListener mOnItemClickListener;
@@ -58,6 +68,12 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
             holder.distance.setText(mContext.getString(R.string.label_card_distance,
                     alarm.getDistance(), mContext.getString(R.string.label_meters)));
         }
+        String mapUrl = BEGIN_URL + alarm.getLocationString() + PARAMETERS_URL + alarm.getLocationString();
+        Picasso.with(mContext)
+                .load(mapUrl)
+                .placeholder(R.drawable.ic_load_map)
+                .error(R.drawable.ic_load_map_error)
+                .into(holder.map);
     }
 
     @Override
@@ -78,6 +94,7 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
         CheckBox sound;
         CheckBox led;
         TextView distance;
+        ImageView map;
 
         public ViewHolder(final View itemView) {
             super(itemView);
@@ -88,6 +105,7 @@ public class AlarmAdapter extends CursorRecyclerAdapter<AlarmAdapter.ViewHolder>
             sound = (CheckBox) itemView.findViewById(R.id.sound_checkbox);
             led = (CheckBox) itemView.findViewById(R.id.led_checkbox);
             distance = (TextView) itemView.findViewById(R.id.distance_text_view);
+            map = (ImageView) itemView.findViewById(R.id.map_image_view);
         }
 
         @Override

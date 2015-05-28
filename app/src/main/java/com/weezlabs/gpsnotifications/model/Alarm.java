@@ -22,6 +22,9 @@ public class Alarm implements Parcelable {
     public static final String LED = "led";
     public static final String DISTANCE = "distance";
 
+    public static final String LAT_LNG_DELIMITER = ";";
+    public static final String LOCATION_DELIMITER = ",";
+
     /**
      * Used to set an expiration time for a geofence. After this amount of time Location Services
      * stops tracking the geofence.
@@ -43,7 +46,6 @@ public class Alarm implements Parcelable {
             return new Alarm[size];
         }
     };
-    public static final String LAT_LNG_DELIMITER = ";";
 
     private int mId;
     private double mLat;
@@ -192,6 +194,10 @@ public class Alarm implements Parcelable {
 
     public String getGeofenceId() {
         return getLat() + LAT_LNG_DELIMITER + getLng();
+    }
+
+    public String getLocationString() {
+        return getLat() + LOCATION_DELIMITER + getLng();
     }
 
     @Override
