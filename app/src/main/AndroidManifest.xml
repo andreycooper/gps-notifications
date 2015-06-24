@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- needed for GeoFences -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -49,15 +50,24 @@
         </provider>
 
         <service
-            android:name=".GeofenceIntentService"
+            android:name=".service.GeofenceIntentService"
+            android:exported="false" >
+        </service>
+        <service
+            android:name=".service.SnoozeIntentService"
             android:exported="false" >
         </service>
 
         <receiver
-            android:name=".CancelAlarmReceiver"
+            android:name=".service.CancelAlarmReceiver"
             android:enabled="true"
             android:exported="false" >
         </receiver>
+
+        <service
+            android:name=".service.CancelIntentService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.weezlabs.gpsnotifications;
+package com.weezlabs.gpsnotifications.service;
 
 import android.content.Context;
 import android.content.res.Resources;
 
 import com.google.android.gms.location.GeofenceStatusCodes;
+import com.weezlabs.gpsnotifications.R;
 
 /**
  * Geofence error codes mapped to error messages.

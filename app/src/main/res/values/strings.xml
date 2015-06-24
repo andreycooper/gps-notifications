@@ -21,8 +21,8 @@
     <string name="label_delete_alarm_dialog_cancel_button">Cancel</string>
     <string name="label_delete_alarm_dialog_delete_button">Delete</string>
 
-    <string name="label_feet">Feet</string>
-    <string name="label_meters">Meters</string>
+    <string name="label_feet">feet</string>
+    <string name="label_meters">meters</string>
 
     <string-array name="array_distance_meters">
         <item>10</item>
@@ -45,7 +45,7 @@
     <string name="label_card_vibration">Vibration</string>
     <string name="label_card_sound">Sound</string>
     <string name="label_card_led">Led</string>
-    <string name="label_card_distance">Distance: %1$s</string>
+    <string name="label_card_distance">Distance: %1$s %2$s</string>
 
     <string name="name_alarm_empty">Empty name</string>
 
@@ -77,5 +77,7 @@
     <string name="geofence_notification_text">You are entered to geofence at %1$s</string>
     <string name="geofence_notification_cancel">Close</string>
     <string name="geofence_notification_repeat">Repeat</string>
+
+    <string name="toast_progress">Getting address…</string>
 
 </resources>

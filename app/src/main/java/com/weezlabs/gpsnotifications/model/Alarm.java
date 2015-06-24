@@ -22,15 +22,15 @@ public class Alarm implements Parcelable {
     public static final String LED = "led";
     public static final String DISTANCE = "distance";
 
+    public static final String LAT_LNG_DELIMITER = ";";
+    public static final String LOCATION_DELIMITER = ",";
+
     /**
      * Used to set an expiration time for a geofence. After this amount of time Location Services
      * stops tracking the geofence.
      */
-    public static final long GEOFENCE_EXPIRATION_IN_HOURS = 12;
+    public static final long GEOFENCE_EXPIRATION_IN_HOURS = 24;
 
-    /**
-     * For this sample, geofences expire after twelve hours.
-     */
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
             GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
 
@@ -46,7 +46,6 @@ public class Alarm implements Parcelable {
             return new Alarm[size];
         }
     };
-    public static final String LAT_LNG_DELIMITER = ";";
 
     private int mId;
     private double mLat;
@@ -183,12 +182,9 @@ public class Alarm implements Parcelable {
                 // geofence.
                 .setRequestId(getGeofenceId())
                         // Set the circular region of this geofence.
-                .setCircularRegion(
-                        getLat(),
-                        getLng(),
-                        getDistance()
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setCircularRegion(getLat(), getLng(), getDistance())
+                .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+//                .setExpirationDuration(Geofence.NEVER_EXPIRE)
                         // Set the transition types of interest. Alerts are only generated for these
                         // transition. We track entry and exit transitions in this sample.
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
@@ -198,6 +194,10 @@ public class Alarm implements Parcelable {
 
     public String getGeofenceId() {
         return getLat() + LAT_LNG_DELIMITER + getLng();
+    }
+
+    public String getLocationString() {
+        return getLat() + LOCATION_DELIMITER + getLng();
     }
 
     @Override

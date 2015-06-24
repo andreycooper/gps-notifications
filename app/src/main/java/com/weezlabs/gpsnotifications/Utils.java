@@ -19,6 +19,12 @@ public class Utils {
     private static final String TILT = "tilt_key";
     private static final String BEARING = "bearing_key";
 
+    /**
+     * Prevents instantiation.
+     */
+    private Utils() {
+    }
+
 
     public static void saveCameraPosition(Context context, CameraPosition cameraPosition) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());

@@ -37,6 +37,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.weezlabs.gpsnotifications.db.AlarmContentProvider;
 import com.weezlabs.gpsnotifications.model.Alarm;
+import com.weezlabs.gpsnotifications.service.AddressAsyncLoader;
+import com.weezlabs.gpsnotifications.service.LocationProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,9 +47,13 @@ import java.util.Locale;
 
 public class MapsActivity extends AppCompatActivity implements LocationProvider.LocationCallback {
     private static final String LOG_TAG = MapsActivity.class.getSimpleName();
+
+    public static final String ALARM_KEY = "com.weezlabs.gpsnotifications.ALARM";
+
+    private static final int REQUEST_CODE = 91;
     private static final int ALARMS_LOADER = 335;
     private static final int ADDRESS_LOADER = 113;
-    private static final float ZOOM_LEVEL = 12;
+    private static final float ZOOM_LEVEL = 17;
     final private HashMap<Marker, Alarm> mMarkerHashMap = new HashMap<>();
     final private HashMap<Marker, Circle> mCircleHashMap = new HashMap<>();
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -85,7 +91,7 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
     private void initProgress() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setMessage("Getting address...");
+        mProgressDialog.setMessage(getString(R.string.toast_progress));
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);
         mProgressDialog.setCanceledOnTouchOutside(false);
@@ -95,12 +101,6 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
     protected void onStart() {
         super.onStart();
         mLocationProvider.connect();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setUpMapIfNeeded();
         if (mMap != null) {
             CameraPosition cameraPosition = Utils.restoreCameraPosition(getApplicationContext());
             if (cameraPosition != null) {
@@ -108,6 +108,12 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
                 mCameraPosition = cameraPosition;
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setUpMapIfNeeded();
     }
 
     @Override
@@ -122,6 +128,22 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
     protected void onStop() {
         super.onStop();
         mLocationProvider.disconnect();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            Alarm alarm = data.getParcelableExtra(ALARM_KEY);
+            if (alarm != null) {
+                LatLng latLng = new LatLng(alarm.getLat(), alarm.getLng());
+                mCameraPosition = new CameraPosition.Builder()
+                        .target(latLng)
+                        .zoom(ZOOM_LEVEL)
+                        .build();
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition), 1000, null);
+            }
+        }
     }
 
     private void setUpMapIfNeeded() {
@@ -301,7 +323,7 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
                     .center(latLng)
                     .strokeWidth(getResources().getDimension(R.dimen.circle_stroke_width))
                     .fillColor(getResources().getColor(R.color.circle_color))
-                    .strokeColor(Color.BLUE)
+                    .strokeColor(Color.TRANSPARENT)
                     .radius(alarm.getDistance())); // In meters
 
             mMarkerHashMap.put(marker, alarm);
@@ -310,7 +332,6 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
     }
 
     private void loadAddress(LatLng latLng) {
-        // TODO: maybe show progress
         Bundle args = new Bundle();
         args.putParcelable(AddressAsyncLoader.LAT_LNG_KEY, latLng);
         Loader<String> loader = getLoaderManager().getLoader(ADDRESS_LOADER);
@@ -344,7 +365,7 @@ public class MapsActivity extends AppCompatActivity implements LocationProvider.
         int id = item.getItemId();
 
         if (id == R.id.action_marker_list) {
-            startActivity(new Intent(this, AlarmListActivity.class));
+            startActivityForResult(new Intent(this, AlarmListActivity.class), REQUEST_CODE);
             return true;
         }
 
